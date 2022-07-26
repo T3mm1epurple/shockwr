@@ -1,0 +1,150 @@
+local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
+
+local win = DiscordLib:Window("shockwave racing")
+
+local gen = win:Server("Game", "")
+
+local main = gen:Channel("Farming")
+
+local plr = game.Players.LocalPlayer
+local camera = game.workspace.Camera
+local hud = plr.PlayerGui.Main.Overlay
+local maxcoin = plr.PlayerGui.Main.Primary.CoinsMax
+local votetable = {
+    First = 1,
+    Second = 2,
+    Third = 3,
+}
+local modes = {
+    "Winning Streak",
+    "Fastest Runner",
+    "Boomerang",
+}
+local mode = ""
+TweenService = game:GetService("TweenService")
+
+autocoin = false
+autowin = false
+speed = 5
+antiafk = false
+autovote = false
+
+win1 = false
+
+main:Toggle("auto collect coins",false, function(bool)
+autocoin = bool
+if bool == false then
+    camera.CameraType = Enum.CameraType.Custom
+    end
+end)
+
+main:Toggle("auto win (use vip server or alt)",false, function(bool)
+autowin = bool
+end)
+
+main:Seperator()
+
+main:Label("ANYTHING BELOW 5 COULD GET YOU BANNED")
+
+local sldr = main:Slider("Tween Speed (auto win)", 0, 15, 5, function(t)
+speed = t
+end)
+
+local voting = gen:Channel("Voting")
+
+local drop = voting:Dropdown("Mode to vote",modes, function(bool)
+    mode = bool
+    print("Mode: "..mode)
+end)
+
+voting:Toggle("Auto Vote (DISABLED)",false, function(bool)
+
+end)
+
+local side = gen:Channel("Other")
+
+side:Toggle("antiafk",false, function(bool)
+antiafk = bool
+end)
+
+hud.ChildAdded:Connect(function(child)
+    if child.Name == "EndFrame" then
+        if autovote == true then
+            local ok = true
+            local d = plr.PlayerGui.Main.Overlay.Voting:GetChildren()
+            for i=1, #d do
+                local frame = d[i]
+                for i,v in pairs(votetable) do
+                    if frame.Name == i then
+                        local gamemode = frame.NameLabel
+                        if gamemode.Text == mode then
+                            if ok == true then
+                                ok = false
+                            print("voted for "..gamemode.Text.." ("..v.." "..i..")")
+                            local args = {
+                            [1] = "Vote",
+                            [2] = -0.10684788972139359,
+                            [3] = 2,
+                            [4] = v
+                        }
+
+                        game:GetService("ReplicatedStorage").COMMUNICATION.REMOTE:FireServer(unpack(args))
+                            end
+                            end
+                        end
+                    end
+            end
+            ok = true
+            end
+        end
+    end)
+
+while wait() do
+    if autowin == true then
+        local gamemode = plr.PlayerGui.Main.Primary.HUD.SubFrame.GamemodeLabel
+        local finish = workspace.Finish.Finish
+        local start = workspace.Spawn.Spawn
+        local hum = plr.Character.HumanoidRootPart
+        delay(1, function()
+        if win1 == false then
+            win1 = true
+             if gamemode.Text ~= "Winning Streak" then
+        TweenService:Create(hum, TweenInfo.new(speed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(finish.Position + Vector3.new(0, 10, 0))}):Play()
+             end
+        wait(speed)
+        hum.CFrame = finish.CFrame
+        if gamemode.Text == "Boomerang" then
+            TweenService:Create(hum, TweenInfo.new(speed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(start.Position + Vector3.new(0, 10, 0))}):Play()
+        wait(speed)
+        hum.CFrame = start.CFrame
+            end
+        win1 = false
+        end
+        end)
+        end
+    if antiafk == true then
+        delay(1, function()
+        keyrelease(0x20)
+        wait(1)
+        keypress(0x20)
+        end)
+        else
+            keyrelease(0x20)
+        end
+    if autocoin == true then
+        if maxcoin.Visible == false then
+                camera.CameraType = Enum.CameraType.Scriptable
+        local d = workspace.Coins.Points:GetChildren()
+        for i=1, #d do
+            if maxcoin.Visible == false then
+            local coin = d[i]
+                    camera.CFrame = coin.CFrame
+                    else
+                        break
+                    end
+        end
+        else
+            camera.CameraType = Enum.CameraType.Custom
+        end
+        end
+    end
